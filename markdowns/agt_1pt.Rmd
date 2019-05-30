@@ -1,0 +1,160 @@
+---
+title: "Aguacate"
+subtitle: "Análisis de mercado, 1a parte"
+author: "Francisco J. López"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html:
+    tufte_variant: "envisioned"
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: agt_1pt.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(extrafont)
+loadfonts(device = "win") 
+load("~/OneDrive/R/Workspaces/aguacate19")
+```
+
+
+# Generalidades
+
+El aguacate es un fruto proveniente del árbol del mismo nombre, endémico de la región que abarca desde el centro de México hasta Centroamérica con alrededor de 90 especies en el continente americano [@Cnb19]. Por sus elevadas propiedades nutricionales y diversidad de usos industriales el aguacate^[En los sucesivo se empleará el término aguacate para hacer referencia al fruto del árbol del aguacate] se ha convertido en un fruto apreciado en el mercado internacional, por lo que su producción y comercialización se ha propagado por distintas partes del mundo.
+
+```{marginfigure}
+En promedio 94 países tuvieron participación comercial como exportadores de aguacate y 130 como importadores durante el periodo comprendido entre los años 2008 y 2017.
+```
+Prueba de lo anterior es el registro en un solo año de un máximo de 102 países exportadores de aguacate y de un máximo de 136 países con registros de importación, cifras alcanzadas en 2013 y 2008, respectivamente, dentro de un universo de 195 países [@Uct19]. Sin embargo, en términos de los volumenes comerciados de manera individual y valoración del fruto se puede hablar de participantes preponderantes como se verá a continuación. 
+
+# Principales jugadores
+
+## Importadores
+
+De un volumen estimado en `r wld_trd_avc %>% filter(Año == 2017, Flujo == "Import", !is.na(vol_kg)) %>% summarise(vol_kg = scales::comma(sum(vol_kg)/1000)) %>% pull() ` toneladas de aguacate correspondiente a las importaciones efectuadas en 2017, se tiene que el mercado estadounidense es por mucho el de mayor participacón con poco mas del 46% del total de las importaciones, seguido por Holanda, Francia, Gran Bretaña, España y Alemania que, en conjunto, concentran prácticamente el 80% de las importaciones.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wld_trd_avc %>%
+  filter(Año == 2017, Flujo == "Import", !is.na(vol_kg), vol_kg != 0) %>% 
+  select(País, vol_kg) %>% 
+  arrange(desc(vol_kg)) %>% 
+  mutate(part = vol_kg / sum(vol_kg), part_cum = cumsum(part)) %>% 
+  mutate(País = as.character(País)) %>% 
+  mutate(pais_otros = if_else(part_cum > 0.8, "Otros", País)) %>% 
+  group_by(pais_otros) %>% 
+  summarise(vol_kg = sum(vol_kg), part = sum(part)) %>%
+  mutate(part_f = scales::percent(part), part_f2 = if_else(part < 0.072, "", part_f)) %>% 
+  mutate(aux = if_else(pais_otros == "Otros", 1, 0)) %>% 
+  arrange(aux, desc(vol_kg)) %>%
+  mutate(aux2 = row_number()) %>%
+  mutate(difer = if_else(part == max(part), T, F)) %>% 
+  ggplot(aes(x = reorder(pais_otros, desc(aux2)), y = part)) + 
+    geom_bar(stat = "identity", aes(fill = difer)) +
+    scale_fill_manual(values = c("grey85","yellowgreen")) +
+    labs(x = "", y = "",
+         title = "Países importadores de aguacate en 2017",
+         subtitle = "Porcentajes de participación en el volumen de las importaciones",
+         caption = "Fuente: UN Comtrade Database") +
+    geom_text(aes(label = part_f2),
+            color = "white",
+            hjust = 1,
+            size = 8,
+            fontface = "bold",
+            nudge_y = -0.005) +
+    coord_flip() +
+    tema_gg +
+    theme(legend.position = "none",
+        axis.text.x = element_blank())
+```
+
+Si bien el volumen de importaciones da una idea de la magnitud física de lo comerciado, este indicador no da cuenta del aprecio de los productos en los diferentes mercados, por ello resulta conveniente revisar la prelación de las importaciones de aguacate a partir de su indicador del valor: volumen multiplicado por su precio.
+
+```{r echo=FALSE}
+kable(wld_trd_avc %>% 
+  filter(Año == 2017, Flujo == "Import") %>% 
+  select(País, vol_kg, val_usd) %>% 
+  mutate(tons = vol_kg/1000, usd_kg = val_usd / vol_kg) %>%
+  arrange(desc(tons)) %>% 
+  top_n(6, tons) %>% 
+  mutate(tons = scales::comma(tons), usd_kg = scales::dollar(usd_kg)) %>%
+  select(País, tons, usd_kg), align = "c", caption = "Top 6 de países importadores de aguacate en 2017 (fuente: UN Comtrade Database)") %>%  
+  column_spec(1:3, width = "4cm")
+```
+
+El único cambio observado en la posición de los países compradores de aguacate en el mercado internacional al considerar el valor como medida para su ordenación, ocurre entre España y Alemania, siendo este último el que mejora su posición, dada su mayor valoración del fruto. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wld_trd_avc %>%
+  filter(Año == 2017, Flujo == "Import", !is.na(vol_kg), vol_kg != 0) %>% 
+  select(País, val_usd) %>% 
+  arrange(desc(val_usd)) %>% 
+  mutate(part = val_usd / sum(val_usd), part_cum = cumsum(part)) %>% 
+  mutate(País = as.character(País)) %>% 
+  mutate(pais_otros = if_else(part_cum > 0.8, "Otros", País)) %>% 
+  group_by(pais_otros) %>% 
+  summarise(val_usd = sum(val_usd), part = sum(part)) %>%
+  mutate(part_f = scales::percent(part), part_f2 = if_else(part < 0.072, "", part_f)) %>% 
+  mutate(aux = if_else(pais_otros == "Otros", 1, 0)) %>% 
+  arrange(aux, desc(val_usd)) %>%
+  mutate(aux2 = row_number()) %>%
+  mutate(difer = if_else(part == max(part), T, F)) %>% 
+  ggplot(aes(x = reorder(pais_otros, desc(aux2)), y = part)) + 
+    geom_bar(stat = "identity", aes(fill = difer)) +
+    scale_fill_manual(values = c("grey85","yellowgreen")) +
+    labs(x = "", y = "",
+         title = "Países importadores de aguacate en 2017",
+         subtitle = "Porcentajes de participación en el valor de las importaciones",
+         caption = "Fuente: UN Comtrade Database") +
+    geom_text(aes(label = part_f2),
+            color = "white",
+            hjust = 1,
+            size = 8,
+            fontface = "bold",
+            nudge_y = -0.005) +
+    coord_flip() +
+    tema_gg +
+    theme(legend.position = "none",
+        axis.text.x = element_blank())
+```
+
+El desenvolvimiento de cada uno de los mercados es otro aspecto que deja de manifiesto el importante papel que juegan los actores principales hasta ahora identificados. La forma aquí adoptada para revisar la evolución de estos mercados a través del tiempo requiere del cálculo de la tasa de crecimiento anual promedio (TCAP) del valor de las importaciones en los últimos 10 años. Sin embargo, dada las importantes diferencias en las magnitudes de su valor, principalmante entre los Estados Unidos y el resto de los países importadores, las tasas deben ser ponderadas para de esta forma permitiendo una comparativa más precisa. Se opta por utilizar como medida de relativización la proporción del valor de las importaciones en 2017 de cada país respecto al mayor valor encontrado en ese mismo año que, en este caso, corresponde al de los Estados Unidos. A esta forma ponderada de las tasas de crecimiento se le denominará tasa de crecimiento anual promedio relativa (TCAPr).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+kable(wld_trd_avc %>% 
+  filter(Flujo == "Import", !is.na(vol_kg), vol_kg != 0) %>% 
+  group_by(País) %>% 
+  tidyr::nest() %>% 
+  mutate(long = purrr::map_dbl(data, ~nrow(.x))) %>% 
+  filter(long == 10) %>% 
+  mutate(tcap = purrr::map_dbl(data, ~ exp(lm(log(vol_kg) ~ Año, .x)$coefficient[2])-1)) %>% 
+  left_join((wld_trd_avc %>% 
+               filter(Año == 2017, Flujo == "Import", !is.na(val_usd), val_usd != 0) %>% 
+               select(País, val_usd) %>% 
+               mutate(peso = val_usd / filter(., País == "USA") %>% select(val_usd) %>%  pull()))) %>% 
+  mutate(tcapr = tcap * peso) %>%   
+  arrange(desc(tcapr)) %>% 
+  top_n(10, tcapr) %>% 
+  select(País, tcap, tcapr) %>% 
+  mutate(TCAP = scales::percent(tcap), TCAPr = scales::percent(tcapr)) %>% 
+  select(País, TCAP, TCAPr), caption = "Top 10 de países con las mayores tasas relativas de crecimiento anual promedio del valor de las importaciones de aguacate, 2008-2017 (fuente: UN Comtrade Database)", align = "c") %>% 
+  column_spec(1:3, width = "4cm")
+```
+
+Dos aspectos a destacar: en el top 6 de países importadores de aguacate ordenados de acuerdo a su crecimiento anual promedio relativo se encuentran los mismos participantes que en las listas ordenas por su volumen y por su valor, lo que indica que estos países no solo son atractivos en términos de su tamaño, también lo son por su estado evolutivo que se muestra aún en una fase de expansión. 
+
+# Referencias

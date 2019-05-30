@@ -1,0 +1,338 @@
+01 Cereales 0101 Amaranto
+01 Cereales 0102 Arroz Palay
+01 Cereales 0103 Avena Grano
+01 Cereales 0104 Centeno Grano
+01 Cereales 0105 Maíz Grano
+01 Cereales 0106 Maíz Palomero
+01 Cereales 0107 Trigo Grano
+01 Cereales 0108 Triticale Grano
+02 Especias_y_medicinales 0201 Achiote
+02 Especias_y_medicinales 0202 Albahaca
+02 Especias_y_medicinales 0203 Anís
+02 Especias_y_medicinales 0204 Chía
+02 Especias_y_medicinales 0205 Comino
+02 Especias_y_medicinales 0206 Especias medicinales
+02 Especias_y_medicinales 0207 Eucalipto
+02 Especias_y_medicinales 0208 Hierbabuena
+02 Especias_y_medicinales 0209 Jamaica
+02 Especias_y_medicinales 0210 Jengibre
+02 Especias_y_medicinales 0211 Manzanilla
+02 Especias_y_medicinales 0212 Mejorana
+02 Especias_y_medicinales 0213 Mostaza
+02 Especias_y_medicinales 0214 Neem
+02 Especias_y_medicinales 0215 Noni
+02 Especias_y_medicinales 0216 Orégano
+02 Especias_y_medicinales 0217 Pimienta
+02 Especias_y_medicinales 0218 Romero
+02 Especias_y_medicinales 0219 Salvia
+02 Especias_y_medicinales 0220 Stevia
+02 Especias_y_medicinales 0221 Tarragón
+02 Especias_y_medicinales 0222 Té Limón
+02 Especias_y_medicinales 0223 Tomillo
+03 Forrajes 0301 Alfalfa verde
+03 Forrajes 0302 Alpiste
+03 Forrajes 0303 Avena forrajera
+03 Forrajes 0304 Canola forraje
+03 Forrajes 0305 Caña de azúcar otro uso
+03 Forrajes 0306 Cebada forrajera
+03 Forrajes 0307 Centeno forrajero
+03 Forrajes 0308 Ebo (janamargo o veza)
+03 Forrajes 0309 Ebo (janamargo o veza) grano
+03 Forrajes 0310 Garbanzo forrajero
+03 Forrajes 0311 Girasol forrajero
+03 Forrajes 0312 Leucaena
+03 Forrajes 0313 Maíz forrajero
+03 Forrajes 0314 Maralfalfa
+03 Forrajes 0315 Nabo forrajero
+03 Forrajes 0316 Nopal forrajero
+03 Forrajes 0317 Olleto
+03 Forrajes 0318 Pastos
+03 Forrajes 0319 Remolacha forrajera
+03 Forrajes 0320 Rye grass
+03 Forrajes 0321 Sorgo forrajero
+03 Forrajes 0322 Sorgo grano
+03 Forrajes 0323 Trébol
+03 Forrajes 0324 Trigo forrajero
+03 Forrajes 0325 Triticale forrajero
+04 Frutales 0401 Aguacate
+04 Frutales 0402 Algarrobo
+04 Frutales 0403 Anona
+04 Frutales 0404 Arrayán
+04 Frutales 0405 Blueberry
+04 Frutales 0406 Caimito
+04 Frutales 0407 Capulín
+04 Frutales 0408 Carambolo
+04 Frutales 0409 Caña de azúcar de otro uso
+04 Frutales 0410 Cereza
+04 Frutales 0411 Chabacano
+04 Frutales 0412 Chirimoya
+04 Frutales 0413 Ciruela
+04 Frutales 0414 Cítricos
+04 Frutales 0415 Coco fruta
+04 Frutales 0416 Dátil
+04 Frutales 0417 Durazno
+04 Frutales 0418 Frambuesa
+04 Frutales 0419 Fresa
+04 Frutales 0420 Frutales varios
+04 Frutales 0421 Granada
+04 Frutales 0422 Guamúchil
+04 Frutales 0423 Guanábana
+04 Frutales 0424 Guayaba
+04 Frutales 0425 Higo
+04 Frutales 0426 Jaca (jackfruit)
+04 Frutales 0427 Lima
+04 Frutales 0428 Limón
+04 Frutales 0429 Limón real
+04 Frutales 0430 Lichi
+04 Frutales 0431 Macadamia
+04 Frutales 0432 Mamey
+04 Frutales 0433 Mandarina
+04 Frutales 0434 Mango
+04 Frutales 0435 Manzana
+04 Frutales 0436 Maracuyá
+04 Frutales 0437 Marañón
+04 Frutales 0438 Melón
+04 Frutales 0439 Membrillo
+04 Frutales 0440 Nanche
+04 Frutales 0441 Naranja
+04 Frutales 0442 Níspero
+04 Frutales 0443 Nuez
+04 Frutales 0444 Papaya
+04 Frutales 0445 Pera
+04 Frutales 0446 Perón
+04 Frutales 0447 Persimonio
+04 Frutales 0448 Pistache
+04 Frutales 0449 Pitahaya
+04 Frutales 0450 Pitaya
+04 Frutales 0451 Piña
+04 Frutales 0452 Piñón
+04 Frutales 0453 Plátano
+04 Frutales 0454 Rambután
+04 Frutales 0455 Sandía
+04 Frutales 0456 Saramuyo
+04 Frutales 0457 Tamarindo
+04 Frutales 0458 Tangelo
+04 Frutales 0459 Tangerina
+04 Frutales 0460 Tejocote
+04 Frutales 0461 Toronja (pomelo)
+04 Frutales 0462 Tuna
+04 Frutales 0463 Uva
+04 Frutales 0464 Zapote
+04 Frutales 0465 Zarzamora
+05 Hortalizas 0501 Acelga
+05 Hortalizas 0502 Ajo
+05 Hortalizas 0503 Alcachofa
+05 Hortalizas 0504 Apio
+05 Hortalizas 0505 Bangaña
+05 Hortalizas 0506 Berenjena
+05 Hortalizas 0507 Betabel
+05 Hortalizas 0508 Brócoli
+05 Hortalizas 0509 Calabacita
+05 Hortalizas 0510 Calabaza
+05 Hortalizas 0511 Cebolla
+05 Hortalizas 0512 Chayote
+05 Hortalizas 0513 Chícharo
+05 Hortalizas 0514 Chilacayote
+05 Hortalizas 0515 Chile verde
+05 Hortalizas 0516 Cilantro
+05 Hortalizas 0517 Col (repollo)
+05 Hortalizas 0518 Col de Bruselas
+05 Hortalizas 0519 Coliflor
+05 Hortalizas 0520 Colinabo
+05 Hortalizas 0521 Ejote
+05 Hortalizas 0522 Elote
+05 Hortalizas 0523 Epazote
+05 Hortalizas 0524 Espárrago
+05 Hortalizas 0525 Espinaca
+05 Hortalizas 0526 Frijol x pelón
+05 Hortalizas 0527 Gailán
+05 Hortalizas 0528 Guaje (verdura)
+05 Hortalizas 0529 Haba verde
+05 Hortalizas 0530 Hortalizas
+05 Hortalizas 0531 Huauzontle
+05 Hortalizas 0532 Jícama
+05 Hortalizas 0533 Kale
+05 Hortalizas 0534 Kohlrabi
+05 Hortalizas 0535 Lechuga
+05 Hortalizas 0536 Leek
+05 Hortalizas 0537 Napa
+05 Hortalizas 0538 Nopalitos
+05 Hortalizas 0539 Okra (angu o gombo)
+05 Hortalizas 0540 Pak Choi
+05 Hortalizas 0541 Pápalo
+05 Hortalizas 0542 Pepino
+05 Hortalizas 0543 Perejil
+05 Hortalizas 0544 Pipicha
+05 Hortalizas 0545 Poro
+05 Hortalizas 0546 Quelite
+05 Hortalizas 0547 Rábano
+05 Hortalizas 0548 Rapini
+05 Hortalizas 0549 Romerito
+05 Hortalizas 0550 Shangai-bock-choy
+05 Hortalizas 0551 Shop Suey
+05 Hortalizas 0552 Tomate rojo (Jitomate)
+05 Hortalizas 0553 Tomate verde
+05 Hortalizas 0554 Verdolaga
+05 Hortalizas 0555 Yu-choy
+05 Hortalizas 0556 Zanahoria
+06 Industriales 0601 Aceituna
+06 Industriales 0602 Agave
+06 Industriales 0603 Algodón hueso
+06 Industriales 0604 Almendra
+06 Industriales 0605 Cacao
+06 Industriales 0606 Café cereza
+06 Industriales 0607 Caña de azúcar
+06 Industriales 0608 Caña de azúcar otro uso
+06 Industriales 0609 Cebada grano
+06 Industriales 0610 Copra
+06 Industriales 0611 Henequén
+06 Industriales 0612 Henequén verde
+06 Industriales 0613 Higuerilla
+06 Industriales 0614 Hule hevea
+06 Industriales 0615 Jatropha
+06 Industriales 0616 Jojoba
+06 Industriales 0617 Maguey pulquero
+06 Industriales 0618 Menta
+06 Industriales 0619 Palma africana o de aceite
+06 Industriales 0620 Palma taco
+06 Industriales 0621 Remolacha azucarera
+06 Industriales 0622 Sábila
+06 Industriales 0623 Sorgo escobero
+06 Industriales 0624 Tabaco
+06 Industriales 0625 Uva
+06 Industriales 0626 Vainilla
+06 Industriales 0627 Zapupe
+07 Legumbres_secas 0701 Arvejón
+07 Legumbres_secas 0702 Frijol
+07 Legumbres_secas 0703 Garbanzo grano
+07 Legumbres_secas 0704 Haba grano
+07 Legumbres_secas 0705 Lenteja
+08 Oleaginosas 0801 Ajonjolí
+08 Oleaginosas 0802 Cacahuate
+08 Oleaginosas 0803 Canola
+08 Oleaginosas 0804 Cártamo
+08 Oleaginosas 0805 Colza
+08 Oleaginosas 0806 Girasol
+08 Oleaginosas 0807 Soya
+09 Orgánicos 0901 Ajo
+09 Orgánicos 0902 Albahaca
+09 Orgánicos 0903 Berenjena
+09 Orgánicos 0904 Brócoli
+09 Orgánicos 0905 Café cereza
+09 Orgánicos 0906 Calabacita
+09 Orgánicos 0907 Cebolla
+09 Orgánicos 0908 Chícharo
+09 Orgánicos 0909 Chile verde
+09 Orgánicos 0910 Chives
+09 Orgánicos 0911 Cilantro
+09 Orgánicos 0912 Ejote
+09 Orgánicos 0913 Eneldo
+09 Orgánicos 0914 Lechuga
+09 Orgánicos 0915 Mejorana
+09 Orgánicos 0916 Menta
+09 Orgánicos 0917 Orégano
+09 Orgánicos 0918 Pepino
+09 Orgánicos 0919 Romero
+09 Orgánicos 0920 Salvia
+09 Orgánicos 0921 Tarragón
+09 Orgánicos 0922 Tomate rojo (Jitomate)
+09 Orgánicos 0923 Tomate verde
+09 Orgánicos 0924 Tomillo
+09 Orgánicos 0925 Zanahoria
+10 Ornamentales 1001 Agapando
+10 Ornamentales 1002 Albricia
+10 Ornamentales 1003 Alhelí
+10 Ornamentales 1004 Alhelí
+10 Ornamentales 1005 Alhelí
+10 Ornamentales 1006 Alpiste ornamental
+10 Ornamentales 1007 Alstroemeria
+10 Ornamentales 1008 Anturios
+10 Ornamentales 1009 Árbol de navidad
+10 Ornamentales 1010 Aretillo
+10 Ornamentales 1011 Aster
+10 Ornamentales 1012 Ave del paraíso
+10 Ornamentales 1013 Azucena
+10 Ornamentales 1014 Begonia
+10 Ornamentales 1015 Belén
+10 Ornamentales 1016 Calancoe
+10 Ornamentales 1017 Cineraria
+10 Ornamentales 1018 Clavel
+10 Ornamentales 1019 Crisantemo
+10 Ornamentales 1020 Crisantemo (planta)
+10 Ornamentales 1021 Ciclamen (planta)
+10 Ornamentales 1022 Dólar
+10 Ornamentales 1023 Flor cera
+10 Ornamentales 1024 Flor perrito
+10 Ornamentales 1025 Flores
+10 Ornamentales 1025 Flores (gruesa)
+10 Ornamentales 1025 Flores (manojo)
+10 Ornamentales 1026 Flores (planta)
+10 Ornamentales 1027 Geranio (planta)
+10 Ornamentales 1028 Gerbera
+10 Ornamentales 1029 Girasol flor
+10 Ornamentales 1030 Gladiola
+10 Ornamentales 1031 Helecho
+10 Ornamentales 1032 Helecho
+10 Ornamentales 1033 Hortensia (planta)
+10 Ornamentales 1034 Inmortal
+10 Ornamentales 1035 Lilium
+10 Ornamentales 1036 Lilium (planta)
+10 Ornamentales 1037 Limonium
+10 Ornamentales 1038 Linaza ornamental
+10 Ornamentales 1039 Mano de león
+10 Ornamentales 1040 Margarita (manojo)
+10 Ornamentales 1041 Nardo
+10 Ornamentales 1042 Noche buena (planta)
+10 Ornamentales 1043 Nube
+10 Ornamentales 1044 Nube
+10 Ornamentales 1045 Palma de ornato
+10 Ornamentales 1046 Palma de ornato (planta)
+10 Ornamentales 1047 Palma de ornato camedor
+10 Ornamentales 1048 Pasto (tapete)
+10 Ornamentales 1049 Pensamiento (planta)
+10 Ornamentales 1050 Petunia
+10 Ornamentales 1051 Plantas de ornato (planta)
+10 Ornamentales 1052 Polar
+10 Ornamentales 1052 Polar
+10 Ornamentales 1053 Pon-pon
+10 Ornamentales 1054 Rosa
+10 Ornamentales 1055 Rosa de invernadero
+10 Ornamentales 1056 Rosa de invernadero (planta)
+10 Ornamentales 1057 Solidago
+10 Ornamentales 1058 Statice
+10 Ornamentales 1059 Statice
+10 Ornamentales 1060 Terciopelo
+10 Ornamentales 1061 Trigo ornamental
+10 Ornamentales 1062 Tulipán holandés invernadero
+10 Ornamentales 1063 Zempoalxóchitl
+10 Ornamentales 1063 Zempoalxóchitl
+10 Ornamentales 1064 Zempoalxóchitl (planta)
+11 Semillas_para_siembras 1101 Brócoli semilla
+11 Semillas_para_siembras 1102 Calabacita semilla
+11 Semillas_para_siembras 1103 Caña de azúcar semilla
+11 Semillas_para_siembras 1104 Cebada grano semilla
+11 Semillas_para_siembras 1105 Cebolla semilla
+11 Semillas_para_siembras 1106 Chile verde semilla
+11 Semillas_para_siembras 1107 Cilantro semilla
+11 Semillas_para_siembras 1108 Coliflor semilla
+11 Semillas_para_siembras 1109 Flores semilla
+11 Semillas_para_siembras 1110 Jícama semilla
+11 Semillas_para_siembras 1111 Lechuga semilla
+11 Semillas_para_siembras 1112 Maíz grano semilla
+11 Semillas_para_siembras 1113 Melón semilla
+11 Semillas_para_siembras 1114 Papa semilla
+11 Semillas_para_siembras 1115 Pepino semilla
+11 Semillas_para_siembras 1116 Sandía semilla
+11 Semillas_para_siembras 1117 Tomate rojo (Jitomate semilla)
+11 Semillas_para_siembras 1118 Zacate semilla
+12 Otros_cultivos 1201 Almacigo (planta)
+12 Otros_cultivos 1202 Calabaza (semilla) o chihua
+12 Otros_cultivos 1203 Estropajo
+12 Otros_cultivos 1204 Fresa (planta)
+12 Otros_cultivos 1205 Guaje
+12 Otros_cultivos 1206 Hoja de plátano (belillo)
+12 Otros_cultivos 1207 Hongos, setas y champiñones
+12 Otros_cultivos 1208 Palo de arco
+12 Otros_cultivos 1209 Plantero de tabaco (planta)
+12 Otros_cultivos 1299 Varios
+12 Otros_cultivos 1210 Viveros (planta)
