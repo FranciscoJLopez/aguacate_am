@@ -2,7 +2,7 @@
 title: "Aguacate"
 subtitle: "Análisis de mercado, 1a parte"
 author: "Francisco J. López"
-date: "`r Sys.Date()`"
+date: "Junio 2019"
 output:
   tufte::tufte_html:
     tufte_variant: "envisioned"
@@ -25,10 +25,10 @@ options(htmltools.dir.version = FALSE)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 library(kableExtra)
 library(extrafont)
+
 loadfonts(device = "win") 
 load("~/OneDrive/R/Workspaces/aguacate19")
 ```
@@ -41,13 +41,13 @@ El aguacate es un fruto proveniente del árbol del mismo nombre, endémico de la
 ```{marginfigure}
 En promedio 94 países tuvieron participación comercial como exportadores de aguacate y 130 como importadores durante el periodo comprendido entre los años 2008 y 2017.
 ```
-Prueba de lo anterior es el registro en un solo año de un máximo de 102 países exportadores de aguacate y de un máximo de 136 países con registros de importación, cifras alcanzadas en 2013 y 2008, respectivamente, dentro de un universo de 195 países [@Uct19]. Sin embargo, en términos de los volumenes comerciados de manera individual y valoración del fruto se puede hablar de participantes preponderantes como se verá a continuación. 
+Prueba de lo anterior es el registro en un solo año de un máximo de 102 países exportadores de aguacate y de un máximo de 136 países con registros de importación, cifras alcanzadas en 2013 y 2008, respectivamente, dentro de un universo de 195 países [@Uct19]. Sin embargo, en términos de los volúmenes comerciados de manera individual y valoración del fruto se puede hablar de participantes preponderantes como se verá a continuación. 
 
 # Principales jugadores
 
 ## Importadores
 
-De un volumen estimado en `r wld_trd_avc %>% filter(Año == 2017, Flujo == "Import", !is.na(vol_kg)) %>% summarise(vol_kg = scales::comma(sum(vol_kg)/1000)) %>% pull() ` toneladas de aguacate correspondiente a las importaciones efectuadas en 2017, se tiene que el mercado estadounidense es por mucho el de mayor participacón con poco mas del 46% del total de las importaciones, seguido por Holanda, Francia, Gran Bretaña, España y Alemania que, en conjunto, concentran prácticamente el 80% de las importaciones.
+De un volumen estimado en `r wld_trd_avc %>% filter(Año == 2017, Flujo == "Import", !is.na(vol_kg)) %>% summarise(vol_kg = scales::comma(sum(vol_kg)/1000)) %>% pull() ` toneladas de aguacate correspondiente a las importaciones efectuadas en 2017, se tiene que el mercado estadounidense es por mucho el de mayor participación con poco más del 46% del total de las importaciones, seguido por Holanda, Francia, Gran Bretaña, España y Alemania que, en conjunto, concentran prácticamente el 80% de las importaciones.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 wld_trd_avc %>%
@@ -133,7 +133,7 @@ wld_trd_avc %>%
         axis.text.x = element_blank())
 ```
 
-El desenvolvimiento de cada uno de los mercados es otro aspecto que deja de manifiesto el importante papel que juegan los actores principales hasta ahora identificados. La forma aquí adoptada para revisar la evolución de estos mercados a través del tiempo requiere del cálculo de la tasa de crecimiento anual promedio (TCAP) del valor de las importaciones en los últimos 10 años. Sin embargo, dada las importantes diferencias en las magnitudes de su valor, principalmante entre los Estados Unidos y el resto de los países importadores, las tasas deben ser ponderadas para de esta forma permitiendo una comparativa más precisa. Se opta por utilizar como medida de relativización la proporción del valor de las importaciones en 2017 de cada país respecto al mayor valor encontrado en ese mismo año que, en este caso, corresponde al de los Estados Unidos. A esta forma ponderada de las tasas de crecimiento se le denominará tasa de crecimiento anual promedio relativa (TCAPr).
+El desenvolvimiento de cada uno de los mercados es otro aspecto que deja de manifiesto el importante papel que juegan los actores principales hasta ahora identificados. La forma aquí adoptada para revisar la evolución de estos mercados a través del tiempo requiere del cálculo de la tasa de crecimiento anual promedio (TCAP) del valor de las importaciones en los últimos 10 años. Sin embargo, dada las importantes diferencias en las magnitudes de su valor, principalmente entre los Estados Unidos y el resto de los países importadores, las tasas deben ser ponderadas para de esta forma permitiendo una comparativa más precisa. Se opta por utilizar como medida de relativización la proporción del valor de las importaciones en 2017 de cada país respecto al mayor valor encontrado en ese mismo año que, en este caso, corresponde al de los Estados Unidos. A esta forma ponderada de las tasas de crecimiento se le denominará tasa de crecimiento anual promedio relativa (TCAPr).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 kable(wld_trd_avc %>% 
@@ -142,7 +142,7 @@ kable(wld_trd_avc %>%
   tidyr::nest() %>% 
   mutate(long = purrr::map_dbl(data, ~nrow(.x))) %>% 
   filter(long == 10) %>% 
-  mutate(tcap = purrr::map_dbl(data, ~ exp(lm(log(vol_kg) ~ Año, .x)$coefficient[2])-1)) %>% 
+  mutate(tcap = purrr::map_dbl(data, ~ exp(lm(log(val_usd) ~ Año, .x)$coefficient[2])-1)) %>% 
   left_join((wld_trd_avc %>% 
                filter(Año == 2017, Flujo == "Import", !is.na(val_usd), val_usd != 0) %>% 
                select(País, val_usd) %>% 
@@ -152,10 +152,513 @@ kable(wld_trd_avc %>%
   top_n(10, tcapr) %>% 
   select(País, tcap, tcapr) %>% 
   mutate(TCAP = scales::percent(tcap), TCAPr = scales::percent(tcapr)) %>% 
-  select(País, TCAP, TCAPr), caption = "Top 10 de países con las mayores tasas relativas de crecimiento anual promedio del valor de las importaciones de aguacate, 2008-2017 (fuente: UN Comtrade Database)", align = "c") %>% 
+  select(País, TCAP, TCAPr), caption = "Top 10 de países con las mayores tasas relativas de crecimiento anual promedio del valor de las importaciones de aguacate, 2010-2017 (fuente: UN Comtrade Database)", align = "c") %>% 
   column_spec(1:3, width = "4cm")
 ```
 
-Dos aspectos a destacar: en el top 6 de países importadores de aguacate ordenados de acuerdo a su crecimiento anual promedio relativo se encuentran los mismos participantes que en las listas ordenas por su volumen y por su valor, lo que indica que estos países no solo son atractivos en términos de su tamaño, también lo son por su estado evolutivo que se muestra aún en una fase de expansión. 
+En el top 6 de países importadores de aguacate ordenados de acuerdo a su crecimiento anual promedio relativo se encuentran los mismos participantes que en las listas ordenas por su volumen y por su valor, lo que indica que estos países no solo son atractivos en términos de su tamaño, también lo son por su estado evolutivo que se muestra aún en una fase de expansión.
+
+Una vez identificados los principales países compradores de aguacate, puede resultar de interés abordar sus particularidades a partir de las cifras de importación con una frecuencia mensual.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# actual monthly series and their trends 
+top6_mod %>% 
+  mutate(data = map(top6_mod$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>%
+  tidyr::unnest(data) %>% 
+  ggplot(aes(periodo, val_usd)) +
+    geom_line(aes(color = "yellowgreen"), size = .5) +
+    geom_smooth(method = "lm",
+                formula = y ~ poly(x, 2),
+                aes(color = "lightgrey"),
+                linetype = 1,
+                size = .65,
+                se = FALSE) +
+    scale_color_manual(labels = c("Tendencia", "Valor"),
+                       values = c("yellowgreen", "lightgrey"),
+                       name = "") +
+    labs(x = "", y = "",
+         title = "Valor de las importaciones mensuales de aguacate\nen países seleccionados, 2010-2017",
+         subtitle = "Millones de dólares",
+         caption = "Fuente: UN Comtrade Database") +
+        facet_wrap(~Fuente_cod, ncol = 3, scales = "free_y") +
+    theme(legend.position = "bottom") +
+    tema_gg  
+
+```
+
+Con excepción de Francia, el resto de los países ubicados en el top 6 de importadores de aguacate muestran relativa estabilidad alrededor de su tendencia hasta el último tercio del periodo comprendido entre los años 2010 y 2017^[A la fecha de elaboración de este documento, los datos publicados de 2017 de las importaciones mensuales de aguacate de Holanda solo cubren de enero a julio de este año, siendo este país el único de los seis analizados que se encuentra en este caso.], cuando comienza a aparecer mayor volatilidad en este mercado.
+
+La tendencia ascendente de los seis casos revisados están en concordancia con el análisis evolutivo arriba efectuado.
+
+Aunque es de esperar un comportamiento estacional en las importaciones por efecto de los ciclos naturales del cultivo, solo en el desarrollo de la serie de las importaciones de aguacate de España se puede observar con mayor claridad este fenómeno. Sin embargo, al extraer los patrones estacionales subyacentes en cada una de las series analizadas se puede apreciar su comportamiento en cada caso.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# getting seasonal indexes
+top6_mod %>% 
+  mutate(data = map(top6_mod$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(indices_est = map(.$val_ts, ~unique(decompose(.x)$seasonal))) %>% 
+  mutate(indices_est =  map(.$indices_est,  ~data.frame(mes = c("ene", "feb", "mar", "abr",
+                                           "may", "jun", "jul", "ago",
+                                           "sep", "oct", "nov", "dic"), ind = .x,
+                                           orden = 1:12))) %>%
+  mutate(indices_est = map(.$indices_est, ~.x %>% mutate(difer = if_else(ind %in% c(max(ind), min(ind)), T, F),
+                                                         difer_t1 = if_else(ind %in% c(max(ind), min(ind)), as.character(round(ind, 1)), ""),
+                                                         difer_t2 = if_else(ind == min(ind), as.character(round(ind, 1)), "")))) %>% 
+  unnest(indices_est) %>% 
+  ggplot(aes(reorder(mes, orden), ind)) + 
+  geom_bar(stat = "identity", aes(fill = difer)) +
+  scale_fill_manual(values = c("grey", "yellowgreen")) +
+  labs(x = "", y = "",
+       title = "Estacionalidad de las importaciones mensuales de aguacate\nen países seleccionados, 2010-2017",
+       subtitle = "Índice estacional",
+       caption = "Fuente: UN Comtrade Database") +
+  facet_wrap(~Fuente_cod, ncol = 2, scales = "free_y") +
+  geom_text(aes(label = difer_t1),
+            color = "white",
+            vjust = 1,
+            nudge_y = -.05,
+            fontface = "bold",
+            size = 3,
+            family = "Lato") +
+  geom_text(aes(label = difer_t2),
+            color = "white",
+            vjust = 0,
+            #nudge_y = 1,
+            fontface = "bold",
+            size = 3,
+            family = "Lato") +
+  tema_gg +
+  theme(legend.position = "none")
+```
+
+En términos generales los patrones estacionales de Alemania y Francia son similares; los de Reino Unido, Holanda y España presentan ciertas semejanzas entre sí pero en contraciclo a lo observado en los Estados Unidos, situación relacionada con la ubicación hemisférica de los abastecedores de unos y otros. Adicionalmente, si se presta atención a las magnitudes de los respectivos índices se observará a lo largo del año una mayor variabilidad en el valor de las importaciones de aguacate en países como Estados Unidos y Holanda que la que se presenta en el resto de los mercados analizados. 
+
+A modo de verificación de la presencia de proveedores contracíclicos entre los principales importadores de aguacate, así como su situación en términos de concentración, se revisan las cifras del valor de las importaciones según su origen para el año más reciente con el que se cuenta con información, este es 2017. En dicho año Francia fue el país que dentro del conjunto de los principales importadores de aguacate en el mundo mostró una mayor diversificación en el origen de sus compras de esta fruta con un total de 49 socios proveedores; en el extremo opuesto se encontró a los Estados Unidos con tan solo 5 países proveedores de aguacate.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# data frame of imports sources
+top6_mod2 <- top6_df %>% 
+  filter(Flujo == "Imports", Socio_cod != "World", Año == 2017) %>% 
+  select(Año, Fuente_cod, Socio_cod, val_usd) %>% 
+  group_by(Fuente_cod, Socio_cod) %>%
+  summarise(val_usd = sum(val_usd, na.rm = T)) %>% 
+  group_by(Fuente_cod) %>%
+  tidyr::nest()
+
+# preparing data frame for making plots
+top6_plot2 <- top6_mod2 %>% 
+  mutate(data = map(top6_mod2$data, ~.x %>%
+                      mutate(part = val_usd / sum(val_usd, na.rm = T)) %>% 
+                      arrange(desc(part)))) %>% 
+  mutate(data = map(.$data, ~.x[1:5,])) %>%
+  mutate(data = map(.$data, ~.x %>% mutate(dif = if_else(val_usd == max(val_usd), T, F)))) %>%
+  mutate(data = map(.$data, ~.x %>% mutate(part_cum = cumsum(part)))) %>% 
+  unnest(data) %>% 
+  mutate(orden = nrow(.):1) %>% 
+  mutate(part_f = scales::percent(part),
+         dif2 = if_else(Fuente_cod == "USA", if_else(part_cum <= 0.9, part_f, ""),
+                                                     if_else(part_cum <= 0.7, part_f, ""))) 
+# making plots
+top6_plot2 %>% 
+  ggplot(aes(orden, val_usd)) + 
+  geom_bar(stat = "identity", aes(fill = dif)) +
+  scale_fill_manual(values = c("grey85", "yellowgreen")) +
+  geom_text(aes(label = dif2),
+            color = "white",
+            hjust = 1,
+            size = 4,
+            fontface = "bold",
+            nudge_y = -0.5) +
+  labs(x = "", y = "",
+       title = "Origen de las importaciones de aguacate en países seleccionados",
+       subtitle = "Participación porcentual en 2017",
+       caption = "Fuente: UN Comtrade Database") +
+  coord_flip() +
+  facet_wrap(~Fuente_cod, ncol = 3, scales = "free") +
+  scale_x_continuous(breaks = top6_plot2$orden, labels = top6_plot2$Socio_cod, expand = c(0,0)) +
+  tema_gg +
+  theme(axis.text.x = element_blank(),
+        legend.position = "none")
+```
+
+En todos los casos, los cinco países mostrados como sus principales proveedores de aguacate concentran más del 70% del total del valor de las compras de esta fruta realizadas en el exterior.
+
+La principal fuente de aguacate en los países europeos es Perú, seguido de Chile, ambos países pertenecientes a la región de América del Sur. Por su parte México, localizado en el hemisferio Norte del planeta es el mayor proveedor de aguacate del mercado norteamericano.  
+
+Al sustraer la tendencia y los ciclos estacionales de las series conformadas por las importaciones de aguacate de los países analizados se deja al descubierto su variabilidad a lo largo del tiempo. A manera de referencia visual, a los gráficos de las series sin tendencia y sin estacionalidad normalizadas se les incorporó una banda que tiene como límites superior e inferior la suma y sustracción de una desviación estándar a la media; de esta forma el desarrollo de una serie cuya banda presenta mayor amplitud será más volátil que otra en la que esto ocurra en menor medida.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# plot of volatility
+top6_vol <- top6_mod %>% 
+  mutate(data = map(top6_mod$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(res = map(.$val_ts, ~as.vector(decompose(.x, type = "multiplicative")$random))) %>%
+  mutate(plot_df = map2(.$res, .$data, ~data.frame(res = .x, val_usd = .y$val_usd, periodo = .y$periodo))) %>%
+  mutate(plot_df = map(.$plot_df, ~.x %>% mutate(val_res = res,
+                                                 mean_val_res = mean(val_res, na.rm = T),
+                                                lim_sup = mean_val_res + sd(val_res, na.rm = T),
+                                                lim_inf = mean_val_res - sd(val_res, na.rm = T)))) %>% 
+  unnest(plot_df)
+top6_vol %>% # an spcecific data frame was created to simplify the ploting task
+  ggplot(aes(x = periodo)) + #geom_histogram(aes(res)) + facet_wrap(~Fuente_cod, ncol = 3)
+  geom_rect(aes(xmin = min(periodo),
+                xmax = max(periodo),
+                ymin = lim_inf,
+                ymax = lim_sup),
+            fill = "grey95",
+            alpha = .5) +
+  geom_line(aes(y = val_res),
+            color = "grey",
+            size = .5) +
+  geom_line(aes(y = mean_val_res),
+            color = "yellowgreen",
+            size = .75,
+            linetype = 2) +
+  labs(x = "", y = "",
+       title = "Volatilidad de las importaciones mensuales de aguacate\nen países seleccionados, 2010-2017",
+       subtitle = "Series normalizadas",
+       caption = "UN Comtrade Database") +
+  tema_gg +
+  facet_wrap(~Fuente_cod, ncol = 3)
+```
+
+Alemania, Francia y Gran Bretaña son, dentro del conjunto de países analizados, los que presentan menor volatilidad en sus importaciones de aguacate; los mercados estadounidense y holandés muestran un mayor grado de volatilidad que los anteriores tres, siendo España el país cuyas importaciones se mostraron con la mayor variabilidad a lo largo de los 10 años considerados en esta comparativa.
+
+La desviación estándar tanto del índice estacional de cada país como de las series desestacionalizadas, sin tendencia y normalizadas, son empleadas como medidas resumen que permiten verificar lo dicho a partir del análisis visual recién efectuado, observando que a mayor magnitud del indicador, mayor su nivel de variación.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Constructing seasonality and volatility metrics
+kable(top6_mod %>% 
+  mutate(data = map(top6_mod$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(indices_est = map(.$val_ts, ~unique(decompose(.x)$seasonal))) %>% 
+  mutate(indices_est =  map(.$indices_est,  ~data.frame(mes = c("ene", "feb", "mar", "abr",
+                                                                "may", "jun", "jul", "ago",
+                                                                "sep", "oct", "nov", "dic"), ind = .x,
+                                                        orden = 1:12))) %>% 
+  unnest(indices_est) %>% 
+  group_by(Fuente_cod) %>% 
+  summarise(fact_est = sd(ind)) %>% 
+  cbind(top6_mod %>% 
+          mutate(data = map(top6_mod$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+          mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+          mutate(val_dt_ds = map(.$val_ts, ~data_frame(val_dt_ds = decompose(.x, type = "multiplicative")$random))) %>% 
+          unnest(val_dt_ds) %>% 
+          group_by(Fuente_cod) %>% 
+          summarise(volat = sd(val_dt_ds, na.rm = T))) %>% 
+  set_names(c("País", "Estacionalidad", "Fuente", "Volatilidad")) %>% 
+  select(-Fuente) %>% 
+  mutate(Estacionalidad = round(Estacionalidad, 2), Volatilidad = round(Volatilidad, 2)), align = "c", caption = "Medidas de variación estacional y volatilidad de las importaciones de aguacate en países seleccionados, 2010-2017 (fuente: UN Comtrade Database)") %>% 
+  column_spec(1:3, width = "4cm")
+```
+
+## Exportadores
+
+El registro del volumen de las exportaciones de aguacate efectuadas en 2007 es de `r wld_trd_avc %>% filter(Año == 2017, Flujo == "Export", !is.na(vol_kg)) %>% summarise(vol_kg = scales::comma(sum(vol_kg)/1000)) %>% pull() ` toneladas, provenientes mayoritariamente de unos cuantos países.
+
+Como se pudo apreciar al revisar el origen de las importaciones de aguacate, el mercado de las exportaciones de esta fruta se encuentra concentrado en más del 80% en 5 países: México, Perú, Holanda, Chile y España, debiendo aclarar que de este grupo, el único que no es productor es Holanda, que, de acuerdo al Buró Central de Estadística de este país [@Cbs19] reexporta el 79% de sus importaciones.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wld_trd_avc %>%
+  filter(Año == 2017, Flujo == "Export", !is.na(vol_kg), vol_kg != 0) %>% 
+  select(País, vol_kg, val_usd) %>% 
+  mutate(p_usd = val_usd / vol_kg) %>%
+  select(País, vol_kg) %>% 
+  arrange(desc(vol_kg)) %>% 
+  mutate(part = vol_kg / sum(vol_kg), part_cum = cumsum(part)) %>% 
+  mutate(País = as.character(País)) %>% 
+  mutate(pais_otros = if_else(part_cum > 0.88, "Otros", País)) %>% 
+  group_by(pais_otros) %>% 
+  summarise(vol_kg = sum(vol_kg), part = sum(part)) %>%
+  mutate(part_f = scales::percent(part), part_f2 = if_else(part < 0.06, "", part_f)) %>% 
+  mutate(aux = if_else(pais_otros == "Otros", 1, 0)) %>% 
+  arrange(aux, desc(vol_kg)) %>%
+  mutate(aux2 = row_number()) %>%
+  mutate(difer = if_else(part == max(part), T, F)) %>% 
+  ggplot(aes(x = reorder(pais_otros, desc(aux2)), y = part)) + 
+    geom_bar(stat = "identity", aes(fill = difer)) +
+    scale_fill_manual(values = c("grey85","yellowgreen")) +
+    labs(x = "", y = "",
+         title = "Países exportadores de aguacate en 2017",
+         subtitle = "Porcentajes de participación en el volumen de las importaciones",
+         caption = "UN Comtrade Database") +
+    geom_text(aes(label = part_f2),
+            color = "white",
+            hjust = 1,
+            size = 8,
+            fontface = "bold",
+            nudge_y = -0.005) +
+    coord_flip() +
+    tema_gg +
+    theme(legend.position = "none",
+        axis.text.x = element_blank())
+```
+
+Al considerar el valor de la producción como medida para establecer el orden de los participantes en el mercado de las exportaciones de aguacate, el único cambio de posición ocurre entre Holanda y Perú, el primero mejorando su posición, situación que tiene sentido al considerar su naturaleza reexportadora.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wld_trd_avc %>%
+  filter(Año == 2017, Flujo == "Export", !is.na(vol_kg), vol_kg != 0) %>% 
+  select(País, vol_kg, val_usd) %>% 
+  mutate(p_usd = val_usd / vol_kg) %>%
+  select(País, val_usd) %>% 
+  arrange(desc(val_usd)) %>% 
+  mutate(part = val_usd / sum(val_usd), part_cum = cumsum(part)) %>% 
+  mutate(País = as.character(País)) %>% 
+  mutate(pais_otros = if_else(part_cum > 0.88, "Otros", País)) %>% 
+  group_by(pais_otros) %>% 
+  summarise(val_usd = sum(val_usd), part = sum(part)) %>%
+  mutate(part_f = scales::percent(part), part_f2 = if_else(part < 0.06, "", part_f)) %>% 
+  mutate(aux = if_else(pais_otros == "Otros", 1, 0)) %>% 
+  arrange(aux, desc(val_usd)) %>%
+  mutate(aux2 = row_number()) %>%
+  mutate(difer = if_else(part == max(part), T, F)) %>% 
+  ggplot(aes(x = reorder(pais_otros, desc(aux2)), y = part)) + 
+    geom_bar(stat = "identity", aes(fill = difer)) +
+    scale_fill_manual(values = c("grey85","yellowgreen")) +
+    labs(x = "", y = "",
+         title = "Países exportadores de aguacate en 2017",
+         subtitle = "Porcentajes de participación en el valor de las exportaciones",
+         caption = "UN Comtrade Database") +
+    geom_text(aes(label = part_f2),
+            color = "white",
+            hjust = 1,
+            size = 8,
+            fontface = "bold",
+            nudge_y = -0.005) +
+    coord_flip() +
+    tema_gg +
+    theme(legend.position = "none",
+        axis.text.x = element_blank())
+```
+
+En concordancia con lo encontrado hasta este punto, la tendencia de las exportaciones de aguacate es creciente en el top cinco de países con el mayor valor en este rubro; más aún, el ritmo de crecimiento exhibido en los últimos 10 años del valor de las exportaciones de los tres principales exportadores es superior al del top de los importadores, lo que habla de la incursión de los exportadores a otros mercados como se vera más adelante. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+top6x_df01 %>% 
+  mutate(data = map(top6x_df01$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>%
+  tidyr::unnest(data) %>% 
+  ggplot(aes(Periodo, val_usd)) +
+  geom_line(aes(color = "yellowgreen"), size = .5) +
+  geom_smooth(method = "lm",
+              formula = y ~ poly(x, 2),
+              aes(color = "lightgrey"),
+              linetype = 1,
+              size = .65,
+              se = FALSE) +
+  scale_color_manual(labels = c("Tendencia", "Valor"),
+                     values = c("yellowgreen", "lightgrey"),
+                     name = "") +
+  labs(x = "", y = "",
+       title = "Valor de las exportaciones mensuales de aguacate\nen países seleccionados, 2008-2017",
+       subtitle = "Millones de dólares",
+       caption = "Fuente: UN Comtrade Database") +
+  facet_wrap(~Fuente_cod, ncol = 3, scales = "free_y") +
+  theme(legend.position = "bottom") +
+  tema_gg
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+kable(wld_trd_avc %>% 
+  filter(Flujo == "Export", !is.na(vol_kg), vol_kg != 0) %>% 
+  group_by(País) %>% 
+  tidyr::nest() %>%
+  mutate(long = purrr::map_dbl(data, ~nrow(.x))) %>% 
+  filter(long >= 9) %>% 
+  mutate(tcap = purrr::map_dbl(data, ~ exp(lm(log(val_usd) ~ Año, .x)$coefficient[2])-1)) %>% 
+  left_join((wld_trd_avc %>% 
+               filter(Año == 2017, Flujo == "Export", !is.na(val_usd), val_usd != 0) %>% 
+               select(País, val_usd) %>% 
+               mutate(peso = val_usd / filter(., País == "MEX") %>% select(val_usd) %>%  pull()))) %>% 
+  mutate(tcapr = tcap * peso) %>%   
+  arrange(desc(tcapr)) %>% 
+  top_n(10, tcapr) %>% 
+  select(País, tcap, tcapr) %>% 
+  mutate(TCAP = scales::percent(tcap), TCAPr = scales::percent(tcapr)) %>% 
+  select(País, TCAP, TCAPr), caption = "Top 10 de países con las mayores tasas relativas de crecimiento anual promedio del valor de las exportaciones de aguacate, 2010-2017 (fuente: UN Comtrade Database)", align = "c") %>% 
+  column_spec(1:3, width = "4cm")
+```
+
+En efecto, dentro del destino de las exportaciones de aguacate de los comercializadores latinoamericanos se observa la presencia de otros mercados como lo son el chino pare el caso de las exportaciones de Perú y Chile y la presencia de Japón como comprador relevante del aguacate proveniente de México. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# data frame of exports sources
+top6x_mod2 <- top6x_df %>% 
+  filter(Flujo == "Exports", Socio_cod != "World", Año == 2017) %>% 
+  select(Año, Fuente_cod, Socio_cod, val_usd) %>% 
+  group_by(Fuente_cod, Socio_cod) %>%
+  summarise(val_usd = sum(val_usd, na.rm = T)) %>% 
+  group_by(Fuente_cod) %>%
+  tidyr::nest()
+
+# preparing data frame for making plots
+top6x_plot2 <- top6x_mod2 %>% 
+  mutate(data = map(top6x_mod2$data, ~.x %>%
+                      mutate(part = val_usd / sum(val_usd, na.rm = T)) %>% 
+                      arrange(desc(part)))) %>% 
+  mutate(data = map(.$data, ~.x[1:5,])) %>%
+  mutate(data = map(.$data, ~.x %>% mutate(dif = if_else(val_usd == max(val_usd), T, F)))) %>%
+  mutate(data = map(.$data, ~.x %>% mutate(part_cum = cumsum(part)))) %>% 
+  unnest(data) %>% 
+  mutate(orden = nrow(.):1) %>% 
+  mutate(part_f = scales::percent(part),
+         dif2 = if_else(Fuente_cod == "MEX", if_else(part_cum <= 0.8, part_f, ""),
+                                                     if_else(part_cum <= 0.6, part_f, ""))) 
+# making plots
+top6x_plot2 %>% 
+  ggplot(aes(orden, val_usd)) + 
+  geom_bar(stat = "identity", aes(fill = dif)) +
+  scale_fill_manual(values = c("grey85", "yellowgreen")) +
+  geom_text(aes(label = dif2),
+            color = "white",
+            hjust = 1,
+            size = 4,
+            fontface = "bold",
+            nudge_y = -0.5) +
+  labs(x = "", y = "",
+       title = "Destino de las exportaciones de aguacate en países seleccionados",
+       subtitle = "Participación porcentual en 2017",
+       caption = "Fuente: UN Comtrade Database") +
+  coord_flip() +
+  facet_wrap(~Fuente_cod, ncol = 3, scales = "free") +
+  scale_x_continuous(breaks = top6x_plot2$orden, labels = top6x_plot2$Socio_cod, expand = c(0,0)) +
+  tema_gg +
+  theme(axis.text.x = element_blank(),
+        legend.position = "none")
+```
+
+Con respecto a la ciclicidad intranual, se observa que México y España guardan un patrón estacional parecido, alcanzando ambos su mayor valor de las exportaciones durante el mes de marzo; las ventas de aguacate de Perú al exterior exhiben su nivel máximo en el mes de junio y con un desfase de cuatro meses las exportaciones chilenas alcanzan su máximo durante el año. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# getting seasonal indexes
+top6x_df01 %>% 
+  mutate(data = map(top6x_df01$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(indices_est = map(.$val_ts, ~unique(decompose(.x)$seasonal))) %>% 
+  mutate(indices_est =  map(.$indices_est,  ~data.frame(mes = c("ene", "feb", "mar", "abr",
+                                           "may", "jun", "jul", "ago",
+                                           "sep", "oct", "nov", "dic"), ind = .x,
+                                           orden = 1:12))) %>%
+  mutate(indices_est = map(.$indices_est, ~.x %>% mutate(difer = if_else(ind %in% c(max(ind), min(ind)), T, F),
+                                                         difer_t1 = if_else(ind %in% c(max(ind), min(ind)), as.character(round(ind, 1)), ""),
+                                                         difer_t2 = if_else(ind == min(ind), as.character(round(ind, 1)), "")))) %>% 
+  unnest(indices_est) %>% 
+  ggplot(aes(reorder(mes, orden), ind)) + 
+  geom_bar(stat = "identity", aes(fill = difer)) +
+  scale_fill_manual(values = c("grey", "yellowgreen")) +
+  labs(x = "", y = "",
+       title = "Estacionalidad de las exportaciones mensuales de aguacate\nen países seleccionados, 2010-2017",
+       subtitle = "Índice estacional",
+       caption = "Fuente: UN Comtrade Database") +
+  facet_wrap(~Fuente_cod, ncol = 2, scales = "free_y") +
+  geom_text(aes(label = difer_t1),
+            color = "white",
+            vjust = 1,
+            nudge_y = -.05,
+            fontface = "bold",
+            size = 3,
+            family = "Lato") +
+  geom_text(aes(label = difer_t2),
+            color = "white",
+            vjust = 0,
+            #nudge_y = 1,
+            fontface = "bold",
+            size = 3,
+            family = "Lato") +
+  tema_gg +
+  theme(legend.position = "none")
+```
+
+Haciendo a un lado las tendencias alcistas y los patrones estacionales presentes en las exportaciones del top cinco de países oferentes de aguacate, se observa una elevada volatilidad en Perú y Chile, mostrando el resto de los países una mayor estabilidad durante el periodo analizado.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# plot of volatility
+top6x_vol <- top6x_df01 %>% 
+  mutate(data = map(top6x_df01$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(res = map(.$val_ts, ~as.vector(decompose(.x, type = "multiplicative")$random))) %>%
+  mutate(plot_df = map2(.$res, .$data, ~data.frame(res = .x, val_usd = .y$val_usd, periodo = .y$Periodo))) %>%
+  mutate(plot_df = map(.$plot_df, ~.x %>% mutate(val_res = res,
+                                                 mean_val_res = mean(val_res, na.rm = T),
+                                                lim_sup = mean_val_res + sd(val_res, na.rm = T),
+                                                lim_inf = mean_val_res - sd(val_res, na.rm = T)))) %>% 
+  unnest(plot_df)
+top6x_vol %>% # an spcecific data frame was created to simplify the ploting task
+  ggplot(aes(x = periodo)) + #geom_histogram(aes(res)) + facet_wrap(~Fuente_cod, ncol = 3)
+  geom_rect(aes(xmin = min(periodo),
+                xmax = max(periodo),
+                ymin = lim_inf,
+                ymax = lim_sup),
+            fill = "grey95",
+            alpha = .5) +
+  geom_line(aes(y = val_res),
+            color = "grey",
+            size = .5) +
+  geom_line(aes(y = mean_val_res),
+            color = "yellowgreen",
+            size = .75,
+            linetype = 2) +
+  labs(x = "", y = "",
+       title = "Volatilidad de las exportaciones mensuales de aguacate\nen países seleccionados, 2010-2017",
+       subtitle = "Series normalizadas",
+       caption = "UN Comtrade Database") +
+  tema_gg +
+  facet_wrap(~Fuente_cod, ncol = 3)
+```
+
+El cálculo de la desviación estándar estacional y de las series desestacionalizadas y sin tendencia de las exportaciones de aguacate confirman lo hasta ahora dicho tras su inspección visual.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Constructing seasonality and volatility metrics
+kable(top6x_df01 %>% 
+  mutate(data = map(top6x_df01$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>% 
+  mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+  mutate(indices_est = map(.$val_ts, ~unique(decompose(.x)$seasonal))) %>% 
+  mutate(indices_est =  map(.$indices_est,  ~data.frame(mes = c("ene", "feb", "mar", "abr",
+                                                                "may", "jun", "jul", "ago",
+                                                                "sep", "oct", "nov", "dic"), ind = .x,
+                                                        orden = 1:12))) %>% 
+  unnest(indices_est) %>% 
+  group_by(Fuente_cod) %>% 
+  summarise(fact_est = sd(ind)) %>% 
+  cbind(top6x_df01 %>% 
+          mutate(data = map(top6x_df01$data, ~.x %>% mutate(val_usd = val_usd/1000000))) %>%
+          mutate(val_ts = map(.$data, ~ts(.x$val_usd, start= c(2010,1), frequency = 12))) %>% 
+          mutate(val_dt_ds = map(.$val_ts, ~data_frame(val_dt_ds = decompose(.x, type = "multiplicative")$random))) %>% 
+          unnest(val_dt_ds) %>% 
+          group_by(Fuente_cod) %>% 
+          summarise(volat = sd(val_dt_ds, na.rm = T))) %>% 
+  set_names(c("País", "Estacionalidad", "Fuente", "Volatilidad")) %>% 
+  select(-Fuente) %>% 
+  mutate(Estacionalidad = round(Estacionalidad, 2), Volatilidad = round(Volatilidad, 2)), align = "c", caption = "Medidas de variación estacional y volatilidad de las exportaciones de aguacate en países seleccionados, 2010-2017 (fuente: UN Comtrade Database)") %>% 
+  column_spec(1:3, width = "4cm")
+```
+
+
+
+<br />
+
+_**En resumen:**_  
+
+* Estados Unidos, Holanda, Francia, Gran Bretaña, España y Alemania conforman el principal bloque de países importadores de aguacate concentrando poco más del 80% de su volumen y valor.
+
+* La tasa de crecimiento anual promedio de las importaciones de aguacate de los últimos 10 años supera el 10% en 5 de los 6 principales países; la excepción es Francia que muestra un menor ritmo de desarrollo (5.9%).
+
+* Los países que exhiben un mayor nivel de variación en las importaciones en un mismo año, son Estados Unidos, Holanda y España; sin embargo, solo España es el país importador que muestra más volatilidad descontando la estacionalidad.
+
+* Por su tamaño, ritmo de crecimiento y relativa estabilidad, el mercado estadounidense se erige como el mercado más atractivo.
+
+* Al 2017, los principales países exportadores de aguacate son México, Holanda, Perú, Chile y España con una participación conjunta superior al 80%; de este grupo, Holanda es el único país que no produce este fruto.
+
+* El destino de las exportaciones de estos países coinciden, en gran medida, con los principales países importadores, surgiendo un par de mercados asiáticos como lo son China y Japón no considerados en el top 6 de los importadores, cuyo posterior análisis puede resultar de interés.
+
+* Mientras que Perú muestra una mayor dispersión en lo que al destino de sus exportaciones se refiere, México es su contraejemplo concentrando sus exportaciones en el mercado norteamericano principalmente; sin embargo, en términos de estabilidad los roles se encuentran invertidos.
+
+* El flujo de la mayor parte del aguacate comercializado en el mundo puede resumirse de la siguiente forma:
+
+  * Perú y Chile son los principales proveedores del mercado Europeo teniendo la presencia de Holanda como un importante intermediario de este mercado. España en cambio juega un doble papel, esto es, el de exportador y el de reexportador.
+  
+  * El bloque de países norteamericanos tiene su propio escenario con México como su proveedor y los Estados Unidos como el principal comprador. En términos de su valor es este el principal mercado.
 
 # Referencias
