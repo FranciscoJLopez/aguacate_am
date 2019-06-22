@@ -1,7 +1,7 @@
 ---
 title: "Aguacate"
 subtitle: "Análisis de mercado, 1a parte"
-author: "Francisco J. López"
+author: "Francisco J. López para EDC Perspectiva Integral"
 date: "Junio 2019"
 output:
   tufte::tufte_html:
@@ -13,7 +13,7 @@ output:
   tufte::tufte_book:
     citation_package: natbib
     latex_engine: xelatex
-bibliography: agt_1pt.bib
+bibliography: agt_bib.bib
 link-citations: no
 ---
 
@@ -480,7 +480,7 @@ kable(wld_trd_avc %>%
   column_spec(1:3, width = "4cm")
 ```
 
-En efecto, dentro del destino de las exportaciones de aguacate de los comercializadores latinoamericanos se observa la presencia de otros mercados como lo son el chino pare el caso de las exportaciones de Perú y Chile y la presencia de Japón como comprador relevante del aguacate proveniente de México. 
+En efecto, dentro del destino de las exportaciones de aguacate de los comercializadores latinoamericanos se observa la presencia de otros mercados como lo son el chino para el caso de las exportaciones de Perú y Chile y la presencia de Japón como comprador relevante del aguacate proveniente de México. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # data frame of exports sources
