@@ -1,0 +1,514 @@
+---
+title: "Aguacate"
+subtitle: "Análisis de mercado, 2a parte"
+author: "Francisco J. López para EDC Perspectiva Integral"
+date: "Junio 2019"
+output:
+  tufte::tufte_html:
+    tufte_variant: "envisioned"
+    #keep_md: true
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: agt_bib.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(extrafont)
+
+loadfonts(device = "win") 
+load("~/OneDrive/R/Workspaces/aguacate19")
+```
+
+# El mercado de los Estados Unidos
+
+## Dinámica de crecimiento
+
+Desde la perspectiva de México, el conocimiento del mercado estadounidense de aguacate reviste de gran interés, recordando que alrededor del 76% de las exportaciones mexicanas de este fruto tienen como destino a su vecino del Norte.
+
+Como punto de partida se revisará la dinámica anualizada del 2008 al 2017 del mercado estadounidense de aguacate empleando para tal propósito las siguientes variables:
+
+* mp: importaciones de aguacate.  
+* xp: exportaciones de aguacate. 
+* pd: producción de aguacate.  
+* ca: consumo aparente de aguacate (pd + mp - xp).  
+* dp: disponibilidad de aguacate (pd + mp).  
+* cn: compras netas de aguacate (mp - xp).
+
+Las tres primeras variables son la base para la construcción de las tres restantes; las primeras dos fueron analizadas con cierto detalle en el capítulo anterior, por lo que la producción de aguacate en los Estados Unidos es la única novedad y, por lo tanto, conviene contextualizarla con algunas generalidades.
+
+En 2017 la producción de aguacate en los Estados Unidos se situó en 187,680 toneladas, cifra que equivale al 20% de las importaciones de este producto en ese mismo año. La producción se concentra en tres estados California, Florida y Hawái [@Nas19], siendo California, por mucho, el estado productor con la mayor aportación.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# avocado production by state
+pdn_avo_usa_edos %>% 
+  mutate(item_id = rep(1:4, length.out = nrow(.))) %>% 
+  filter(Year == 2017, item_id == 3) %>% 
+  #summarise(total = sum(Value)) %>% 
+  #mutate(total = scales::comma(total)) %>% 
+  mutate(st_id = c("CA", "FL", "HI")) %>% 
+  select(st_id, Value) %>% 
+  mutate(part = scales::percent(Value / sum(Value)),
+         difer = if_else(st_id == "CA", T, F),
+         difer2 = if_else(st_id %in% c("CA", "FL"), part, "")) %>% 
+  ggplot(aes(x = reorder(st_id, Value), y = Value)) +
+    geom_bar(stat = "identity", aes(fill = difer)) +
+    scale_fill_manual(values = c("grey85","yellowgreen")) +
+    geom_text(aes(label = difer2),
+            color = "white",
+            hjust = 1,
+            size = 6,
+            fontface = "bold",
+            nudge_y = -0.005) +
+    labs(x = "", y = "",
+         title = "Estados productores de aguacate en 2017",
+         subtitle = "Porcentajes de participación en la producción\nde los Estados Unidos",
+         caption = "Fuente: National Agricultural Statistics Service") +
+    coord_flip() +
+    tema_gg +
+    theme(legend.position = "none",
+            axis.text.x = element_blank())
+```
+
+Dicho lo anterior y habiendo generado el resto de las variables se observa que las series exhiben una tendencia a la alza en su realización a través del tiempo con excepción de la producción que muestra mas bien un descenso.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# actual series and their trends
+wld_trd_avc %>% 
+  filter(País == "USA", Flujo == "Import") %>% 
+  select(Año, vol_kg) %>% 
+  arrange(Año) %>% 
+  mutate(mp = vol_kg/1000) %>% 
+  select(-vol_kg) %>% 
+  cbind(wld_trd_avc %>% 
+          filter(País == "USA", Flujo == "Export") %>% 
+          select(Año, vol_kg) %>% 
+          arrange(Año) %>%
+          mutate(xp = vol_kg/1000) %>% 
+          select(xp),
+        pdn_avo_usa %>% 
+          select(pdn_ton) %>% 
+          rename(pd = pdn_ton)) %>% 
+  mutate(ca = pd - xp + mp,
+         dp = ca + xp,
+         cn = mp - xp) %>%
+  mutate_at(vars(-Año), ~./1000) %>%  # thousends of tonnes
+  mutate(periodo = as.Date(paste0(Año, "-1-1"))) %>% 
+  gather("key", "value", mp:cn) %>%  
+  ggplot(aes(x = periodo, y = value)) +
+    geom_line(aes(col = "yellowgreen"), size = 0.5) +
+    geom_smooth(aes(col = "ligthgray"),
+              method = "lm",
+              #formula = y ~ poly(x, 2),
+              #linetype = 1,
+              size = .65,
+              se = FALSE) +
+    scale_color_manual(labels = c("Tendencia", "Valor"),
+                       values = c("yellowgreen", "lightgrey"),
+                       name = "") +
+    labs(x = "", y = "",
+         title = "Evolución de variables seleccionadas en el mercado\nestadounidense del aguacate, 2008-2017",
+         subtitle = "Miles de toneladas",
+         caption = "Fuente: UN Comtrade Database") +
+    facet_wrap(~key, ncol = 3, scales = "free_y") +
+    theme(legend.position = "bottom") +
+    tema_gg
+```
+
+Para poder efectuar una comparativa de la dinámica presente en las variables seleccionadas más allá de su tendencia se debe hacer a un lado las diferencias de escala; para tal propósito se calcula su respectiva tasa de crecimiento anual promedio (TCAP) y su versión relativa (TCAPr) que, en esta ocasión, tiene como ponderador a la proporción de los datos observados en 2017 respecto al de la disponibilidad de aguacate (dp) de ese mismo año, por ser esta última variable la de mayor magnitud.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+kableExtra::kable(wld_trd_avc %>% 
+  filter(País == "USA", Flujo == "Import") %>% 
+  select(Año, vol_kg) %>% 
+  arrange(Año) %>% 
+  mutate(mp = vol_kg/1000) %>% 
+  select(-vol_kg) %>% 
+  cbind(wld_trd_avc %>% 
+          filter(País == "USA", Flujo == "Export") %>% 
+          select(Año, vol_kg) %>% 
+          arrange(Año) %>%
+          mutate(xp = vol_kg/1000) %>% 
+          select(xp),
+        pdn_avo_usa %>% 
+          select(pdn_ton)) %>%
+          rename(pd = pdn_ton) %>% 
+  mutate(ca = pd - xp + mp,
+         dp = pd + mp,
+         cn = mp - xp) %>%
+  gather("key", "value", mp:cn) %>%
+  group_by(key) %>% 
+  nest() %>% 
+  mutate(TCAP = map_dbl(.$data, ~exp(lm(log(value) ~ Año, .x)$coef[2])-1)) %>% 
+  mutate(val_17 = map_dbl(.$data, ~.x %>% filter(Año == 2017) %>% select(value) %>% pull())) %>% 
+  mutate(wt = val_17 / max(val_17), TCAPr = TCAP * wt) %>%
+  rename(Variable = key) %>% 
+  select(Variable, TCAP, TCAPr) %>% 
+  mutate_at(vars(-Variable), ~scales::percent(.)), caption = "Tasas de crecimiento en variables seleccionadas pertenecientes al mercado del aguacate en los Estados Unidos, 2010-2017 (fuente: UN Comtrade Database y NSSA)", align = "c") %>% 
+  kableExtra::column_spec(1:3, width = "4cm")
+```
+
+```{r fig-margin, fig.margin=TRUE, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Evolución de variables seleccionadas en miles de toneladas (fuente: UN Comtrade y NASS)"}
+wld_trd_avc %>% 
+  filter(País == "USA", Flujo == "Import") %>% 
+  select(Año, vol_kg) %>% 
+  arrange(Año) %>% 
+  mutate(mp = vol_kg/1000) %>% 
+  select(-vol_kg) %>% 
+  cbind(wld_trd_avc %>% 
+          filter(País == "USA", Flujo == "Export") %>% 
+          select(Año, vol_kg) %>% 
+          arrange(Año) %>%
+          mutate(xp = vol_kg/1000) %>% 
+          select(xp),
+        pdn_avo_usa %>% 
+          select(pdn_ton) %>% 
+          rename(pd = pdn_ton)) %>% # mutate(pd_rel = pd /mp)
+  mutate(ca = pd - xp + mp,
+         dp = ca + xp,
+         cn = mp - xp) %>%
+  mutate_at(vars(-Año), ~./1000) %>%  # thousends of tonnes
+  mutate(periodo = as.Date(paste0(Año, "-1-1"))) %>%
+  mutate(upper = if_else(Año == 2012, ca, as.numeric(NA)),
+         lower = if_else(Año == 2012, cn, as.numeric(NA))) %>%
+  mutate(ca_t = if_else(Año == 2009, ca, as.numeric(NA)),
+         cn_t = if_else(Año == 2016, cn, as.numeric(NA)),
+         pd_t = if_else(Año == 2012, (ca + cn) / 2, as.numeric(NA))) %>% 
+  ggplot(aes(x = periodo)) +
+    geom_line(aes(y = ca), size = 1, col = "yellowgreen") +
+    geom_line(aes(y = cn), size = 1, col = "grey85") +
+    geom_linerange(aes(ymax = upper, ymin = lower), size = 1, linetype = 2, col = "grey80") +
+    geom_text(aes(y = ca_t + 50, label = "ca"), size = 10, family = "Lato") +
+    geom_text(aes(y = cn_t - 30, label = "cn"), size = 10, family = "Lato") +
+    geom_text(aes(y = pd_t - 30, label = "pd "), size = 10, family = "Lato", hjust = "right") +
+    labs(x = "", y = "") +
+    tema_gg
+```
+
+Las tasas relativas permiten resumir lo ocurrido durante el periodo analizado de la siguiente manera: el crecimiento del consumo a una tasa promedio de 9.5% (9.1% en términos relativos) es cubierto por un incremento de las importaciones a un ritmo ligeramente superior que compensa la prácticamente nula contracción de la producción nacional y el incremento en las exportaciones.
+
+Pero ¿es de esperar que ese nivel de crecimiento del consumo se mantenga? Para tratar de dar respuesta a esta pregunta se utilizará otra estrategia de análisis consistente en la estimación de su tasa de variación para cada año.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wld_trd_avc %>% 
+  filter(País == "USA", Flujo == "Import") %>% 
+  select(Año, vol_kg) %>% 
+  arrange(Año) %>% 
+  mutate(mp = vol_kg/1000) %>% 
+  select(-vol_kg) %>% 
+  cbind(wld_trd_avc %>% 
+          filter(País == "USA", Flujo == "Export") %>% 
+          select(Año, vol_kg) %>% 
+          arrange(Año) %>%
+          mutate(xp = vol_kg/1000) %>% 
+          select(xp),
+        pdn_avo_usa %>% 
+          select(pdn_ton)) %>%
+          rename(pd = pdn_ton) %>% 
+  mutate(ca = pd - xp + mp,
+         dp = pd + mp,
+         cn = mp - xp) %>%
+  mutate(ca2 = ca) %>% 
+  mutate(periodo = as.Date(paste0(Año, "-1-1"))) %>% 
+  mutate_at(vars(-periodo, -Año, -ca2), ~xts::diff.xts(log(.))) %>%
+  mutate(mean_ca =  exp(lm(log(ca2) ~ Año, data = .)$coef[2])-1,
+         mean_ca1aux = if_else(Año <= 2012, ca2, as.numeric(NA)),
+         mean_ca1 = if_else(!is.na(mean_ca1aux), exp(lm(log(mean_ca1aux) ~ Año, data = .)$coef[2])-1, as.numeric(NA)),
+         mean_ca2aux = if_else(Año >= 2013, ca2, as.numeric(NA)),
+         mean_ca2 = if_else(!is.na(mean_ca2aux), exp(lm(log(mean_ca2aux) ~ Año, data = .)$coef[2])-1, as.numeric(NA)),
+         ca1_txt = if_else(Año == 2009, mean_ca1, as.numeric(NA)),
+         ca2_txt = if_else(Año == 2016, mean_ca2, as.numeric(NA))) %>% 
+  ggplot(aes(x = periodo)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_line(aes(y = ca), col = "yellowgreen", size = 1) +
+  geom_line(aes(y = mean_ca1), col = "grey80", linetype = 2, size = 1) +
+  geom_line(aes(y = mean_ca2), col = "grey80", linetype = 2, size = 1) +
+  geom_text(aes(y = ca1_txt+.05, label = scales::percent(ca1_txt)), hjust = "right", family = "Lato") +
+  geom_text(aes(y = ca2_txt+.05, label = scales::percent(ca2_txt)), family = "Lato") +
+  labs(x = "", y = "",
+       title = "Variación porcentual anual del consumo aparente\nde aguacate en los Estados Unidos, 2009-2017",
+       caption = "Fuente: UN Comtrade y NASS") +
+  tema_gg
+```
+
+La tasa de variación del consumo aparente del aguacate tiene presencia de fluctuaciones más pronunciadas durante la primera mitad del decenio analizado que en los años más recientes; sin embargo, la tasa de crecimiento promedio segmentada por quinquenios es prácticamente igual, lo que arroja señales de la continuación de un crecimiento aunque a un menor ritmo pero que incluso tiende a estabilizarse alrededor de su valor medio.
+
+## Precios
+
+```{r fig-margin1, fig.margin=TRUE, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Distribución del precio al mayoreo del aguacate en los Estados Unidos en dólares por kg, 2008-2017 (fuente: AMS)"}
+avo_pr_df %>% 
+  filter(destino == "USA", !(anio %in% c(2018, 2019))) %>% 
+  select(usd_kg) %>%
+  ggplot(aes(usd_kg)) +
+  geom_density(col = "yellowgreen", fill = "grey95", alpha = 0.25) +
+  geom_vline(xintercept = median(avo_pr_df %>%
+                                  filter(destino == "USA", !(anio %in% c(2018, 2019))) %>%
+                                  select(usd_kg) %>% 
+                                  pull()), linetype = 2, col = "yellowgreen") +
+
+  labs(x = "", y = "") +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        text = element_text(family = "Lato"),
+        plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "bold"),
+        #axis.ticks.y = element_blank(),
+        axis.text = element_text(family = "Lato Light"),
+        axis.line = element_line(color = "lightgrey"))
+
+```
+
+La base de datos de precios del mercado agrícola norteamericano publicadas por una de las áreas del Departamento de Agricultura de los Estados Unidos [@Ams19] permite abordar su análisis desde diferentes perspectivas. Desde el punto de vista más general y bajo el mismo horizonte de análisis hasta ahora utilizado, que abarca información del 2008 al 2017, se tiene que el precio del aguacate al mayoreo en el mercado norteamericano se situó alrededor de los **2.79 dólares por kg**. Dado el sesgo que se presenta en los datos de precios, la mediana es la medida de tendencia central empleada para resumirlos. Hay que tener en cuenta que esta cifra se refiere al valor típico de los registros que no necesariamente guardan relación con el volumen comerciado, más adelante se abundará al respecto.
+
+Entre los aspectos que se pueden resaltar al revisar la información de precios desde un ángulo más particular se encuentran los siguientes:
+
+El mercado de abastos de la ciudad de San Francisco es el destino donde el precio típico es el más elevado. Por otro lado, el aguacate de la variedad Lamb Hass es el mejor valorado en el mercado norteamericano pero no el de mayor presencia, este atributo le pertenece al aguacate de la variedad Hass. De acuerdo a su tamaño, los aguacates clasificados con tamaño 56^[En el sitio [Index Fresh](http://indexfresh.com/growers/avocado-sizing/) se puede encontrar información detallada respecto a la clasificación por tamaño del aguacate.] -que tienen un peso individual aproximado de 177 g- presentan el mayor precio; sin embargo, este precio puede considerarse como atípico al provenir únicamente de dos registros en un universo de 59,400; bajo este criterio el tamaño 45 que es el que le sigue se encontraría en la misma situación con tan solo 6 datos, razón por la cual se omiten del gráfico. Por lo tanto, el tamaño más habitual y que puede ser considerado el de mayor precio es el 48 correspondiente a los aguacates con un peso individual de alrededor de los 278 g.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+gridExtra::grid.arrange(plt01, plt02, plt03, plt04, ncol = 2)
+```
+
+El mayor diferencial de precio en una misma categoría ocurre en el aguacate clasificado de acuerdo a su tipo, pudiendo ser orgánico o no orgánico. El precio por kg de aguacate orgánico es mayor como es de esperarse, aunque su presencia en el mercado es aún baja con poco más del 5% del total de los registros.
+
+Al agrupar los precios del aguacate de acuerdo a su origen se presenta una situación similar a lo ocurrido en el caso de la clasificación por tamaño, las categorías con los precios más elevados representan casos aislados. Si bien los precios de los aguacates procedentes de Ecuador y Nueva Zelanda exhiben las mayores cifras, estas resultan irrelevantes ya que en conjunto se cuenta con solo 19 registros. Dejándolos de lado, se tiene que el aguacate proveniente de México es el de mayor valoración y presencia con prácticamente el 48% de los registros del periodo analizado, seguido en importancia por la cantidad de registros por los Estados Unidos, no así por su precio, ya que en esta categoría se coloca por debajo de Perú y Chile.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+avo_pr_df %>% 
+  filter(destino == "USA", !(anio %in% c(2018, 2019))) %>% 
+  group_by(origen) %>% 
+  summarise(avg = median(usd_kg),
+            fq = n()) %>%
+  filter(avg <= 3.5) %>% 
+  mutate(ranking = rank(-avg)) %>%
+  mutate(aux = if_else(ranking > 5, "Otros", origen)) %>%
+  group_by(aux) %>% 
+  summarise(avg = mean(avg),
+            fq = sum(fq)) %>% 
+  mutate(part = scales::percent(fq/sum(fq))) %>% #arrange(desc(fq))
+  arrange(desc(avg)) %>%
+  mutate(col_aux = if_else(avg == max(avg), T, F)) %>%
+  ggplot(aes(reorder(aux, avg), avg)) +
+  geom_bar(stat = "identity", aes(fill = col_aux)) +
+  geom_text(aes(label = round(avg, 2)),
+            col = "white",
+            hjust = 1,
+            size = 7,
+            fontface = "bold",
+            nudge_y = -.1) +
+  scale_fill_manual(values = c("lightgrey", "yellowgreen")) +
+  scale_x_discrete(aes(values = reorder(aux, avg)),
+                  labels = c("Otros", "DOM", "USA", "CHL", "PER", "MEX")) +
+  labs(x = "", y = "",
+       title = "Precio promedio según su origen",
+       subtitle = "usd/kg") +
+  coord_flip() +
+  tema_gg +
+  theme(legend.position = "none",
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank())
+```
+
+Considerando explícitamente el aspecto temporal cabe preguntarse ¿cómo han cambiado los precios del aguacate al mayoreo en los Estados Unidos a lo largo del horizonte de análisis? Si lo que se busca es una respuesta de carácter general, es decir, que abarque la totalidad del mercado, el primer paso es incorporar a los precios el volumen de lo comerciado, cifra que no está incluida en los registros publicados, por lo que se debe echar mano de otras fuentes para realizar una estimación de la realización de la serie de precios a través del tiempo.
+
+El aguacate comerciado en las centrales de abasto es tanto de procedencia extranjera como nacional; el Servicio Exterior de Agricultura [@Fas19] proporciona información de las importaciones mensuales de los productos agrícolas; por otro lado, la Comisión del aguacate de California [@Cav19] publica estimaciones de la producción basadas en lo ocurrido cuatro años atrás. A partir de esta información y asumiendo que la producción de aguacate de California es representativa de la nacional -supuesto basado en el hecho de que el 90% del aguacate norteamericano tiene su origen en California-, se llega a una estimación del precio de esta fruta en el periodo comprendido entre el 2015 y el 2018 de alrededor de los **3.29 dólares por kg**.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+disp_usa_1518 %>% 
+  group_by(Year, let) %>% 
+  nest() %>% 
+  mutate(data = map(.$data, ~.x %>% mutate(ton_tot = sum(ton)))) %>% 
+  unnest(data) %>% 
+  mutate(wt = ton / ton_tot) %>% 
+  left_join(meses) %>% 
+  arrange(soc_grupos, Year, mes) %>%
+  cbind(avo_pr_df %>% 
+          filter(anio %in% c(2015:2018)) %>% 
+          mutate(origen = if_else(!(origen %in% c("MEXICO", "USA")), "Otros", origen)) %>% 
+          group_by(origen, anio, mes) %>% 
+          summarise(central = median(usd_kg)) %>%
+          rename(Mes = mes) %>% 
+          as.data.frame()) %>% #filter(Year == 2018, mes == 4) %>% summarise(sum(wt))
+  group_by(Year, mes) %>% 
+  summarise(usd_kg = sum(wt * central)) %>%
+  ungroup() %>% 
+  mutate(an_me = as.Date(paste0(Year, "-", mes, "-1"))) %>%
+  mutate(med = median(usd_kg),
+         usd_kg_bg = if_else(an_me < as.Date("2018-01-01"), usd_kg, as.numeric(NA)),
+         usd_kg_ed = if_else(an_me >= as.Date("2018-01-01"), usd_kg, as.numeric(NA))) %>% 
+  ggplot(aes(x = an_me, y = usd_kg)) + 
+  geom_line(aes(y = usd_kg_bg), col = "grey85", size = 1) +
+  geom_line(aes(y = usd_kg_ed), col = "darkgrey", size = 1) +
+  geom_line(aes(y = med), col = "yellowgreen", size = 1, linetype = 2) +
+  labs(x = "", y = "",
+       title = "Evolución del precio del aguacate al mayoreo en el mercado\nnorteamericano considerando volúmenes comerciados, 2015-2018",
+       subtitle = "usd/kg",
+       caption = "Fuente: AMS, FAS, NASS y Californian Avocado Comission") +
+  tema_gg
+```
+
+Como se observa, este periodo de cuatro años estuvo marcado por drásticos cambios. El comportamiento de los precios en 2015 y comienzos de 2016 parece sujetarse a un ciclo estacional. A mediados del segundo trimestre del 2016 y todo 2017 las drásticas fluctuaciones fueron la norma, situación que tendió a disminuir en 2018 pero sin recuperar aún el patrón estacional exhibido al comienzo de este espacio temporal. A este punto cabe hacerse algunas preguntas: ¿la volatilidad mostrada entre 2016 y 2017 se presenta con frecuencia o más bien se trata de algo excepcional, siendo la regla un comportamiento de los precios acorde a ciclos estacionales? Dada la presencia de volatilidad en la mayor parte del periodo analizado ¿se puede establecer una tendencia de crecimiento?
+
+Para dar respuesta a estas preguntas conviene ampliar el horizonte de análisis. Una forma de hacerlo es retomar la serie de registros de precios lo que permite una mejor visualización de su desarrollo temporal de la que se pueda extraer algunas conjeturas respecto a su comportamiento anterior y esperado, además de sacar el máximo provecho a la información disponible. Lo que justifica su uso para este propósito es que a pesar de que los registros no contienen información del volumen comerciado, su agrupación en forma de serie temporal se encuentra altamente correlacionada con la serie de precios que tiene en cuenta los volúmenes de producto^[El coeficiente de correlación entre ambas series es de 0.97, durante el periodo 2015-2018.]. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+avo_pr_df %>% 
+  filter(destino == "USA") %>% 
+  mutate(anio_mes = as.Date(paste0(anio, "-", mes, "-1"))) %>% 
+  group_by(anio_mes) %>% 
+  summarise(central = median(usd_kg)) %>%
+  mutate(central_bgn = if_else(anio_mes >= as.Date("2018-01-01"), as.numeric(NA), central),
+         central_end = if_else(anio_mes >= as.Date("2018-01-01"), central, as.numeric(NA)),
+         central_1 = avo_pr_df %>% 
+                        filter(destino == "USA", anio < 2018) %>% 
+                        summarise(central = median(usd_kg)) %>% 
+                        pull(), as.numeric(NA)) %>%
+  ggplot(aes(anio_mes, central)) +
+  geom_line(aes(y = central_bgn), col = "grey85", size = 1) +
+  geom_line(aes(y = central_end), col = "darkgrey", size = 1) +
+  geom_smooth(col = "yellowgreen", se = F, size = 1) +
+  geom_line(aes(y = central_1), col = "yellowgreen", size = .5, linetype = 2) +
+  labs(x = "", y = "",
+       title = "Evolución del precio del aguacate al mayoreo\nen el mercado norteamericano, 2008-may2019",
+       subtitle = "usd/kg",
+       caption = "Fuente: AMS") +
+  tema_gg
+```
+
+Se puede observar como el elevado incremento ocurrido en 2017 es más un evento extraordinario en cuanto a su valor, no así en lo que respecta a su tendencia, ya que a pesar de que en 2018 y lo que va de 2019 se han reducido los precios a niveles anteriormente vistos, las magnitudes observadas superan mayoritariamente el precio central del horizonte de análisis. En lo sucesivo se hará uso de la totalidad de los datos a partir del 2008 para no dejar fuera del estudio los efectos de los recientes incrementos. 
+
+```{r fig-margin2, fig.margin=TRUE, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Precios semanales del aguacate al mayoreo en el mercado norteamericano, según orígenes seleccionados, valores centrales en usd/kg, 2008-may2019 (fuente: AMS)"}
+avo_pr_df %>% 
+  filter(destino == "USA", origen %in% c("USA", "MEXICO")) %>%
+  mutate(origen = if_else(origen == "MEXICO", "MEX", origen)) %>% 
+  group_by(origen, semana) %>% 
+  summarise(usd_kg = median(usd_kg)) %>%
+  mutate(aux_t = if_else(semana == 3, origen, as.character(NA))) %>% 
+  ggplot(aes(x = semana, y = usd_kg)) +
+  geom_line(aes(color = origen), size = 1) +
+  geom_text(aes(label = aux_t), vjust = "bottom", family = "Lato",
+            fontface = "bold", nudge_y = .08, hjust = "left", size = 5) +
+  scale_color_manual(values = c("yellowgreen", "grey85")) +
+  labs(x = "", y = "") +
+  scale_x_continuous(breaks = seq(0, 51, 3)) +
+  tema_gg +
+  theme(legend.position = "none",
+        legend.title = element_blank())
+```
+
+Una característica de la serie histórica de precios del aguacate al mayoreo en el mercado estadounidense es la presencia de ciclos estacionales, los cuales dan origen a ventanas de oportunidad, pero ¿esta ventana es valida para toda la oferta de aguacate en los Estados Unidos? En realidad no, las condiciones edafoclimáticas que varían de región en región aunado a la presencia de distintas variedades determinan la oferta de cada país que, como es de esperarse, es particular; el arribo del producto al mercado norteamericano de forma diferida determina su disponibilidad periodo tras periodo y es precisamente esta variable la que influye sobre el precio de mercado.
+
+Un primer acercamiento a estas ventanas se hará agrupando los precios respecto a su temporalidad con una frecuencia mensual para un origen determinado, en este caso el interés se centra en el aguacate proveniente de México.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kableExtra::kable(avo_pr_df %>%
+  filter(destino == "USA", origen == "MEXICO") %>%
+  left_join(meses) %>% 
+  group_by(let, mes) %>% 
+  summarise(Precio = median(usd_kg)) %>%
+  arrange(mes) %>% 
+  select(-mes) %>% 
+  rename(Mes = let) %>% 
+  mutate_at(vars(Precio), ~round(.,2)), align = "c", caption = "Precios mensuales al mayoreo del aguacate en el mercado norteamericano, valores centrales en usd/kg (fuente: AMS)") %>% 
+  kableExtra::column_spec(1:2, width = "6cm")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+avo_pr_df %>% 
+  filter(destino == "USA", origen == "MEXICO") %>%
+  left_join(meses) %>% 
+  mutate(aux = if_else(mes %in% c(8,9), T, F)) %>% 
+  ggplot(aes(group = let, x = reorder(let, mes), y = usd_kg)) +
+  geom_boxplot(outlier.alpha = 0.25,
+               aes(fill = aux, color = aux),
+               alpha = .375) +
+  scale_fill_manual(values = c("lightgrey", "yellowgreen")) +
+  scale_color_manual(values = c("lightgrey", "yellowgreen")) +
+  labs(x = "", y = "",
+       title = "Distribución mensual de los precios al mayoreo del aguacate\nen los Estados Unidos proveniente de México, 2008-may2019",
+       subtitle = "usd/kg",
+       caption = "Fuente: AMS") +
+  tema_gg +
+  theme(legend.position = "none")
+```
+
+Agosto y septiembre son lo meses con los mayores precios y cuentan con atributos adicionales como lo son una mayor dispersión y sesgo respecto al resto de los meses; como en prácticamente todos los casos, solo es posible encontrar valores extremos superiores.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+kableExtra::kable(avo_pr_df %>%
+  filter(destino == "USA", mes %in% c(8,9), origen == "MEXICO") %>% 
+  group_by(semana) %>% 
+  summarise(Precio = median(usd_kg)) %>% 
+  rename(Semana = semana) %>% 
+  mutate_at(vars(Precio), ~round(.,2)), align = "c", caption = "Precios semanales al mayoreo del aguacate en el mercado norteamericano proveniente de México durante los meses de agosto y septiembre, valores centrales en usd/kg (fuente: AMS)") %>% 
+  kableExtra::column_spec(1:2, width = "6cm")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+avo_pr_df %>% 
+  filter(destino == "USA", mes %in% c(8,9), origen == "MEXICO") %>%
+  mutate(aux = if_else(semana %in% c(32,33,34), T, F)) %>% 
+  ggplot(aes(group = semana, x = as.factor(semana), y = usd_kg)) +
+  geom_boxplot(outlier.alpha = 0.25,
+               aes(fill = aux, color = aux),
+               alpha = .375) +
+  scale_fill_manual(values = c("lightgrey", "yellowgreen")) +
+  scale_color_manual(values = c("lightgrey", "yellowgreen")) +
+  labs(x = "", y = "",
+       title = "Distribución semanal de los precios al mayoreo del aguacate en los Estados\nUnidos provenientes de México en los meses de mayo y junio, 2008-may2019",
+       subtitle = "usd/kg",
+       caption = "Fuente: AMS") +
+  tema_gg +
+  theme(legend.position = "none")
+```
+
+Los mismo datos pero analizados en forma semanal permiten observar como en las semanas 32, 33 y 34 el precio central alcanza su máximo. Estas semanas se encuentran dentro de las primeras del mes de agosto y representan la mayor ventana de oportunidad del aguacate en el mercado norteamericano producido en México.
+
+Para cerrar esta segunda entrega, se estima el precio del aguacate en el mercado minorista. Se tiene que durante el 2018 el **precio promedio del aguacate al menudeo en los Estados Unidos fue de 4.48 dólares por kg**, lo que implica un margen de comercialización aproximado del 36% sobre el precio al mayoreo que se ubicó alrededor de los 3.31 dólares por kg. El precio al menudeo fue estimado considerando el peso promedio habitual del aguacate durante 2018 -0.27 kg aproximadamente- y la presencia en el mercado de los dos tipos de aguacate: orgánico y no orgánico, con una participación de 7 y 92%, respectivamente. Al igual que los precios al mayoreo, los datos de los precios al menudeo son publicados por el área de servicios de mercadotecnia agrícola de la USDA [@Ams19].
+
+_**En resumen:**_
+
+* El total de la producción anual de aguacate en territorio norteamericano equivale a aproximadamente el 20% del volumen de las importaciones de esta fruta del mismo periodo.
+
+* El 90% de la producción de aguacate dentro de los Estados Unidos se cosecha en California; el 10% restante proviene de Florida y en mucho menor medida de Hawái.
+
+* El crecimiento anual promedio del consumo aparente de aguacate en los Estados Unidos es del 9.5%, ritmo que tiende a reducirse muy lentamente, por lo que puede hablarse aún de un mercado en expansión.
+
+* La producción estadounidense de aguacate lejos de incrementarse comienza a descender, por lo que el crecimiento en el consumo aparente es atendido por un aumento en las importaciones a un ritmo superior.
+
+* La combinación de crecimiento sostenido en el consumo y la reducción de la producción local parece estar relacionada con el incremento en el precio del aguacate en el mercado estadounidense de los últimos años, situación que queda abierta para un análisis posterior.
+
+* Los precios más elevados de cada categoría ocurren de la siguiente forma:
+
+  * Mercado destino: San Francisco.  
+  * Tipo: Orgánico.  
+  * Variedad: Lamb Hass.  
+  * Tamaño: 56s.  
+  * Origen: México.
+
+* El precio promedio mayorista del aguacate en los Estados Unidos de los últimos cuatro años fue de 3.29 dólares por kg, cifra que resulta superior a lo observado en periodos anteriores.
+
+* El precio al mayoreo presenta una tendencia de crecimiento pero con perspectivas de una menor volatilidad a la observada en 2017.
+
+* Para el aguacate proveniente de México la mejor ventana de precios se tiene en el mes de agosto y en particular en las semanas de la 32 a la 34, alcanzando un valor alrededor de los 3.82 dólares por kg.
+
+* En 2018, el margen de comercialización minorista fue estimado en 36%, lo que arroja un precio promedio del aguacate de 4.48 dólares por kg.
+
+---
+nocite: |
+  @Ers19, @Uct19
+...
+
+# Referencias
