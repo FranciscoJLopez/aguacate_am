@@ -7,7 +7,7 @@ library(tufte)
 #### DATOS ####
 
 # Conexion y exploracion de base de datos SIACON_NG
-con <- dbConnect(RSQLite::SQLite(), "C:/Users/OfficeMax/Documents/SIACON_NG/siacon-ng.db")
+con <- dbConnect(RSQLite::SQLite(), "C:/Users/OfficeMax/Documents/SIACON/siacon-ng.db")
 dbListTables(con)
 
 # Obtencion de clave (id) de de entidades
@@ -19,6 +19,15 @@ id_cult <- dbReadTable(con, "cat_cultivo")
 
 # Obtencion de grupo natural
 id_gpo <- dbReadTable(con, "cat_gruponatural")
+
+# Obtencion de modalidad
+id_mod <- dbReadTable(con, "cat_modalidad")
+
+# Obtencion de tipo
+id_tipo <- dbReadTable(con, "cat_tipo_produccion")
+
+# Obtencion de mercado
+id_mdo <- dbReadTable(con, "cat_mercado")
 
 # Obtencion de clave del aguacate
 dbListFields(con, "cat_cultivo")
@@ -34,7 +43,7 @@ id_var <- dbFetch(res)
 dbClearResult(res)
 
 # Obtencion de tabla de datos del aguacate por estados;
-# base de gran tamaño, requiere SQL query para mayor rapidez
+# base de gran tama?o, requiere SQL query para mayor rapidez
 dbListFields(con, "agro_cierre_estatal")
 dbReadTable(con, "agro_cierre_estatal") %>% filter(idcultivo == 5060000) %>% select(anio) %>% distinct()
 res <- dbSendQuery(con, "SELECT *
@@ -44,7 +53,7 @@ agt_nal <- dbFetch(res)
 dbClearResult(res)
 
 # Obtencion de tabla de datos del aguacate por municipios;
-# base de gran tamaño, requiere SQL query para mayor rapidez
+# base de gran tama?o, requiere SQL query para mayor rapidez
 res <- dbSendQuery(con, "SELECT *
                         FROM agro_cierre_municipal
                         WHERE idcultivo = 5060000")
@@ -114,3 +123,4 @@ agt_mun %>%
   ggplot(aes(idmunicipio, vol)) + 
     geom_col() +
     coord_flip()
+
